@@ -38,6 +38,7 @@ quests=[]
 currAlts=[]
 mapa={}
 paras = doc.paragraphs
+endHeader= False
 for para in paras:
     if 'graphicData' in para._p.xml:
         currDesc.append((1,countImg))
@@ -51,7 +52,19 @@ for para in paras:
            mapa[tuple(currAlts)]=currDesc
            currDesc=[]
            currAlts=[]
-    else: currDesc.append((0,countPara))
+    else: 
+        testPara= para.text.encode('utf-8')
+        if re.match(r'^(QUESTÃO|questão)( 01|1)',testPara)or re.match(r'^(01|1)[).-]', testPara):
+            print(endHeader)
+            if(endHeader==False):
+                endHeader=True
+                print("1 QUESTAO")
+                header=currDesc
+                print(header)
+                print(para.text)
+                currDesc=[]
+                print(header)
+        currDesc.append((0,countPara))
     countPara = countPara + 1
 mixOptions=[]
 mixQuest=[]
@@ -77,12 +90,23 @@ for typeExam in listMixQuest:
     countPara=0
     for para in newParas:
         para.text=''
+    for i in header:
+        if i[0]==1:
+            run = newParas[countPara].add_run()
+            run.add_picture('Images/'+str(images[i[1]]))
+        else:
+            #print(i[1])
+            #print(paras[i[1]].text)
+            newParas[countPara].text = paras[i[1]].text
+            print(newParas[countPara].text)
+            print(countPara)
+        countPara+=1
     for question in typeExam:
         currDesc = mapa[tuple(sorted(question))]
-        print(question)
-        print(currDesc)
+        #print(question)
+        #print(currDesc)
         for i in currDesc:
-            print(i)
+            #print(i)
             if i[0]==1:
                 run = newParas[countPara].add_run()
                 run.add_picture('Images/'+str(images[i[1]]))
@@ -90,14 +114,20 @@ for typeExam in listMixQuest:
                 #print(i[1])
                 #print(paras[i[1]].text)
                 newParas[countPara].text = paras[i[1]].text
-                print(newParas[countPara].text)
+                #print(newParas[countPara].text)
             countPara+=1
+        indexAlt=0
         for alt in question:
-            newParas[countPara].text = paras[alt[0]].text
-            print(newParas[countPara].text)
+            newAlt= unicode(paras[alt[0]].text.encode('utf-8'), "utf-8")
+            newAlt = chr(indexAlt+65) + newAlt[1:]
+            #print(newAlt)
+            newParas[countPara].text = newAlt
+            #print(newParas[countPara].text)
             countPara+=1
+            indexAlt+=1
     newExam.save('demo'+str(countExam)+'.docx')
     countExam+=1
+    #print(chr(65))
 
 
 
