@@ -39,6 +39,14 @@ currAlts=[]
 mapa={}
 paras = doc.paragraphs
 endHeader= False
+feedback='1A-2B-3C-4A-5D-6E'
+answers={}
+feedback=feedback.split('-')
+treatFeedback=[]
+for i in feedback:
+    treatFeedback.append(i[1]) 
+for i in treatFeedback:
+    print(i)
 for para in paras:
     if 'graphicData' in para._p.xml:
         currDesc.append((1,countImg))
@@ -55,15 +63,28 @@ for para in paras:
     else: 
         testPara= para.text.encode('utf-8')
         if re.match(r'^(QUESTÃO|questão)( 01|1)',testPara)or re.match(r'^(01|1)[).-]', testPara):
-            print(endHeader)
+            #print(endHeader)
             if(endHeader==False):
                 endHeader=True
-                print("1 QUESTAO")
+                #print("1 QUESTAO")
                 header=currDesc
-                print(header)
-                print(para.text)
+                #print(header)
+                #print(para.text)
                 currDesc=[]
-                print(header)
+                #print(header)
+                if re.match(r'^(QUESTÃO|questão)( 01)',testPara):
+                    #print("tem q ser 1")
+                    typeDescQuest=0
+                elif re.match(r'^(QUESTÃO|questão)( 1)',testPara):
+                    typeDescQuest=1
+                elif re.match(r'^(01)', testPara):
+                    if re.match(r'(01)[)]',testPara): typeDescQuest=2
+                    elif re.match(r'(01)[.]',testPara): typeDescQuest=3
+                    elif re.match(r'(01)[-]',testPara): typeDescQuest=4
+                else:
+                    if re.match(r'(1)[)]',testPara): typeDescQuest=5
+                    elif re.match(r'(1)[.]',testPara): typeDescQuest=6
+                    elif re.match(r'(1)[-]',testPara): typeDescQuest=7      
         currDesc.append((0,countPara))
     countPara = countPara + 1
 mixOptions=[]
@@ -88,6 +109,7 @@ for typeExam in listMixQuest:
     newExam = Document('AC 1 ano III unid - História.docx')
     newParas = newExam.paragraphs
     countPara=0
+    countQuestion=1
     for para in newParas:
         para.text=''
     for i in header:
@@ -98,8 +120,8 @@ for typeExam in listMixQuest:
             #print(i[1])
             #print(paras[i[1]].text)
             newParas[countPara].text = paras[i[1]].text
-            print(newParas[countPara].text)
-            print(countPara)
+            #print(newParas[countPara].text)
+            #print(countPara)
         countPara+=1
     for question in typeExam:
         currDesc = mapa[tuple(sorted(question))]
@@ -112,8 +134,34 @@ for typeExam in listMixQuest:
                 run.add_picture('Images/'+str(images[i[1]]))
             else:
                 #print(i[1])
+                newDesc = paras[i[1]].text.encode('utf-8')
                 #print(paras[i[1]].text)
-                newParas[countPara].text = paras[i[1]].text
+                if re.match(r'^(QUESTÃO|questão)', newDesc):
+                    #print("ENTROOOOU" + str(countQuestion))
+                    if typeDescQuest==0:
+                        newDesc= newDesc[0:8]+ " "+str(countQuestion).zfill(2)+newDesc[11:]
+                    else:
+                        if re.match(r'[0-9]', newDesc[10]):
+                            newDesc= newDesc[0:8]+ " "+str(countQuestion).zfill(2)+newDesc[11:]
+                        else:
+                            newDesc= newDesc[0:8]+ " "+str(countQuestion)+newDesc[10:]
+                    #print(newDesc)
+                elif re.match(r'^[0-9][0-9][).-]', paras[i[1]].text):
+                    if re.match(r'^[0-9][0-9][)]', paras[i[1]].text) and typeDescQuest==2:
+                        newDesc= str(countQuestion).zfill(2)+newDesc[2:]
+                    elif re.match(r'^[0-9][0-9][.]', paras[i[1]].text) and typeDescQuest==3:
+                        newDesc= str(countQuestion).zfill(2)+newDesc[2:]
+                    elif re.match(r'^[0-9][0-9][-]', paras[i[1]].text) and typeDescQuest==4:
+                        newDesc= str(countQuestion).zfill(2)+newDesc[2:]
+                elif re.match(r'^[0-9][).-]', paras[i[1]].text):
+                    if re.match(r'^[0-9][)]', paras[i[1]].text) and typeDescQuest==5:
+                        newDesc= str(countQuestion).zfill(2)+newDesc[1:]
+                    elif re.match(r'^[0-9][.]', paras[i[1]].text) and typeDescQuest==6:
+                        newDesc= str(countQuestion).zfill(2)+newDesc[1:]
+                    elif re.match(r'^[0-9][-]', paras[i[1]].text) and typeDescQuest==7:
+                        newDesc= str(countQuestion).zfill(2)+newDesc[1:]
+                newDesc = unicode(newDesc, "utf-8")
+                newParas[countPara].text = newDesc
                 #print(newParas[countPara].text)
             countPara+=1
         indexAlt=0
@@ -125,6 +173,7 @@ for typeExam in listMixQuest:
             #print(newParas[countPara].text)
             countPara+=1
             indexAlt+=1
+        countQuestion+=1
     newExam.save('demo'+str(countExam)+'.docx')
     countExam+=1
     #print(chr(65))
