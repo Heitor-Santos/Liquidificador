@@ -5,20 +5,30 @@ from itertools import islice
 from random import shuffle
 from docx import Document
 from fpdf import FPDF
+from pyfiglet import Figlet
 import zipfile
 import re
+import os
+import shutil
 
-nameDoc = input("por favor digite o nome do documento com o '.docx' no final ")
+f = Figlet(font='small')
+print(f.renderText('Liquidificador'))
+print("Primeiro precisamos do nome do documento com o '.docx' no final")
+print("Exemplos:    prova_3_ano.docx    provaFINAL.2019.docx    teste5serie.docx")
+print("OBS: Se o documento não estiver na mesma pasta que o programa, digite o endereço inteiro")
+print("Exemplos Windows:    C:\cliente\\fulano\\prova_3_ano.docx    D:\\pasta\\teste5serie.docx")
+print("Exemplos Linux:  /home/fulano/Documentos/provaFINAL.2019.docx    /home/prvs/prova1.2019.docx")
+nameDoc = input("Por favor digite aqui o nome do documento: ")
 z = zipfile.ZipFile(nameDoc)
 all_files = z.namelist()
 pdf = FPDF()
 pdf.add_page()
 pdf.set_font("Arial", size=12)
-images = filter(lambda x: x.startswith('word/media/'), all_files)
+liquidImgs = filter(lambda x: x.startswith('word/media/'), all_files)
 j=0
-for i in images:
+for i in liquidImgs:
     image1 = z.open(i).read()
-    z.extract(i, r'Images')
+    z.extract(i, r'liquidImgs')
     j=j+1
 
 doc = Document(nameDoc)
@@ -33,7 +43,10 @@ currAlts=[]
 mapa={}
 paras = doc.paragraphs
 endHeader= False
-feedback=input("por favor digite o o gabarito no seguinte formato '1A-2B-3D-4A-5E' ")
+print("Agora precisamos do gabarito da prova no formato NúmeroLetra-NúmeroLetra")
+print("Exemplos: 1A-2B-3D-4A-5E     1B-2C-3B-4A-5C-6A-7B    1C-2C-3B")
+print("OBS: As letras devem estar em maiúsculo")
+feedback=input("Por favor digite aqui o gabarito: ")
 answers={}
 feedback=feedback.split('-')
 treatFeedback=[]
@@ -103,10 +116,11 @@ for typeExam in listMixQuest:
     for i in header:
         if i[0]==1:
             run = newParas[countPara].add_run()
-            run.add_picture('Images/'+str(images[i[1]]))
+            run.add_picture('liquidImgs/'+str(liquidImgs[i[1]]))
         else:
             newParas[countPara].text = paras[i[1]].text
         countPara+=1
+    paras[0].text= "TIPO "+str(typeExam)+paras[0].text
     for question in typeExam:
         currDesc = mapa[tuple(sorted(question))]
         indexAns = ord(answers[tuple(sorted(question))])-65
@@ -116,7 +130,7 @@ for typeExam in listMixQuest:
         for i in currDesc:
             if i[0]==1:
                 run = newParas[countPara].add_run()
-                run.add_picture('Images/'+str(images[i[1]]))
+                run.add_picture('liquidImgs/'+str(liquidImgs[i[1]]))
             else:
                 newDesc = paras[i[1]].text
                 if re.match(r'^(QUESTÃO|questão)', newDesc):
@@ -152,7 +166,10 @@ for typeExam in listMixQuest:
             countPara+=1
             indexAlt+=1
         countQuestion+=1
-    pdf.cell(200, 10, txt=newFeedback, ln=1, align="L")
+    pdf.cell(200, 10, txt="TIPO "+str(typeExam)+"\n"+newFeedback, ln=1, align="L")
     newExam.save(nameDoc[0:len(nameDoc)-5]+' TIPO '+str(countExam)+'.docx')
     countExam+=1
 pdf.output("gabarito "+nameDoc+".pdf")
+print("Provas e gabaritos gerados!")
+if os.path.isdir('liquidImgs'):
+    shutil.rmtree('liquidImgs')
