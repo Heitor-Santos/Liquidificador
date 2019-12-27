@@ -39,14 +39,14 @@ currAlts=[]
 mapa={}
 paras = doc.paragraphs
 endHeader= False
-feedback='1A-2B-3C-4A-5D-6E'
+feedback='1A-2B-3C-4A-5D-6E-7E-7A-9A-10A-11B-12C-13D-14E-15C'
 answers={}
 feedback=feedback.split('-')
 treatFeedback=[]
 for i in feedback:
-    treatFeedback.append(i[1]) 
-for i in treatFeedback:
-    print(i)
+    treatFeedback.append(i[len(i)-1]) 
+#for i in treatFeedback:
+    #print(i)
 for para in paras:
     if 'graphicData' in para._p.xml:
         currDesc.append((1,countImg))
@@ -58,8 +58,11 @@ for para in paras:
         if countPara==len(paras)-1 or not re.match(r'^[A-za-z][).-]', paras[countPara+1].text):
            quests.append(currAlts)
            mapa[tuple(currAlts)]=currDesc
+           answers[tuple(currAlts)]=treatFeedback[countQuest]
+           #print(answers[tuple(currAlts)])
            currDesc=[]
            currAlts=[]
+           countQuest+=1
     else: 
         testPara= para.text.encode('utf-8')
         if re.match(r'^(QUESTÃO|questão)( 01|1)',testPara)or re.match(r'^(01|1)[).-]', testPara):
@@ -110,6 +113,7 @@ for typeExam in listMixQuest:
     newParas = newExam.paragraphs
     countPara=0
     countQuestion=1
+    newFeedback=''
     for para in newParas:
         para.text=''
     for i in header:
@@ -125,6 +129,10 @@ for typeExam in listMixQuest:
         countPara+=1
     for question in typeExam:
         currDesc = mapa[tuple(sorted(question))]
+        indexAns = ord(answers[tuple(sorted(question))])-65
+        ans=sorted(question)[indexAns]
+        newIndexAns = question.index(ans)
+        newFeedback+=str(countQuestion)+"-"+chr(newIndexAns+65)+" "
         #print(question)
         #print(currDesc)
         for i in currDesc:
@@ -174,6 +182,7 @@ for typeExam in listMixQuest:
             countPara+=1
             indexAlt+=1
         countQuestion+=1
+    print(newFeedback)
     newExam.save('demo'+str(countExam)+'.docx')
     countExam+=1
     #print(chr(65))
