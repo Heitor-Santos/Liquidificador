@@ -4,6 +4,7 @@ from itertools import product
 from itertools import islice
 from random import shuffle
 from docx import Document
+from fpdf import FPDF
 import docx2txt
 import zipfile
 import re
@@ -15,7 +16,9 @@ z = zipfile.ZipFile("AC 1 ano III unid - História.docx")
 #print all files in zip archive
 all_files = z.namelist()
 #print all_files
-
+pdf = FPDF()
+pdf.add_page()
+pdf.set_font("Arial", size=12)
 #get all files in word/media/ directory
 images = filter(lambda x: x.startswith('word/media/'), all_files)
 j=0
@@ -108,6 +111,7 @@ for i in listMixQuest:
         shuffle(j)
 for i in listMixQuest: shuffle(i)
 countExam=0
+pdf.cell(200, 10, txt="GABARITO 'AC 1 ano III unid - História.docx'", ln=1, align="C")
 for typeExam in listMixQuest:
     newExam = Document('AC 1 ano III unid - História.docx')
     newParas = newExam.paragraphs
@@ -182,10 +186,11 @@ for typeExam in listMixQuest:
             countPara+=1
             indexAlt+=1
         countQuestion+=1
-    print(newFeedback)
+    pdf.cell(200, 10, txt=newFeedback, ln=1, align="L")
     newExam.save('demo'+str(countExam)+'.docx')
     countExam+=1
-    #print(chr(65))
+pdf.output("gabarito.pdf")
+
 
 
 
