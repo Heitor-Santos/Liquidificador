@@ -18,7 +18,10 @@ print("Exemplos:    prova_3_ano.docx    provaFINAL.2019.docx    teste5serie.docx
 print("OBS: Se o documento não estiver na mesma pasta que o programa, digite o endereço inteiro")
 print("Exemplos Windows:    C:\cliente\\fulano\\prova_3_ano.docx    D:\\pasta\\teste5serie.docx")
 print("Exemplos Linux:  /home/fulano/Documentos/provaFINAL.2019.docx    /home/prvs/prova1.2019.docx")
+print(" ")
 nameDoc = input("Por favor digite aqui o nome do documento: ")
+print("---------------------------------------------------------------------")
+print(" ")
 z = zipfile.ZipFile(nameDoc)
 all_files = z.namelist()
 pdf = FPDF()
@@ -46,7 +49,13 @@ endHeader= False
 print("Agora precisamos do gabarito da prova no formato NúmeroLetra-NúmeroLetra")
 print("Exemplos: 1A-2B-3D-4A-5E     1B-2C-3B-4A-5C-6A-7B    1C-2C-3B")
 print("OBS: As letras devem estar em maiúsculo")
+print(" ")
 feedback=input("Por favor digite aqui o gabarito: ")
+print("------------------------------------------------------------------ ")
+print(" ")
+numExams=int(input("Por favor digite aqui o número de tipos de prova diferentes desejado: "))
+print(" --------------------------------------------------------------")
+print(" ")
 answers={}
 feedback=feedback.split('-')
 treatFeedback=[]
@@ -91,7 +100,7 @@ mixQuest=[]
 permQuest=[]
 finalQuest=[]
 for i in quests: mixOptions.append(permutations(i))
-mixQuest = islice(product(*mixOptions),10,100,10)
+mixQuest = islice(product(*mixOptions),1,10*numExams,10)
 listMixQuest=[]
 itemMixQuest=[]
 for i in mixQuest:
@@ -166,7 +175,8 @@ for typeExam in listMixQuest:
             countPara+=1
             indexAlt+=1
         countQuestion+=1
-    pdf.cell(200, 10, txt="TIPO "+str(typeExam)+"\n"+newFeedback, ln=1, align="L")
+    pdf.cell(200, 10, txt="TIPO "+str(countExam),ln=1, align="L")
+    pdf.cell(200, 10, txt=newFeedback,ln=1, align="L")
     newExam.save(nameDoc[0:len(nameDoc)-5]+' TIPO '+str(countExam)+'.docx')
     countExam+=1
 pdf.output("gabarito "+nameDoc+".pdf")
