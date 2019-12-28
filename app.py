@@ -129,7 +129,7 @@ for typeExam in listMixQuest:
         else:
             newParas[countPara].text = paras[i[1]].text
         countPara+=1
-    paras[0].text= "TIPO "+str(typeExam)+paras[0].text
+    newParas[0].text= "TIPO "+str(countExam)+paras[0].text
     for question in typeExam:
         currDesc = mapa[tuple(sorted(question))]
         indexAns = ord(answers[tuple(sorted(question))])-65
