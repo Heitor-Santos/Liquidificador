@@ -27,6 +27,7 @@ all_files = z.namelist()
 pdf = FPDF()
 pdf.add_page()
 pdf.set_font("Arial", size=12)
+#basicamente se tiver qualquer img no texto, ele salva em word/media/liquidImgs
 liquidImgs = filter(lambda x: x.startswith('word/media/'), all_files)
 j=0
 for i in liquidImgs:
@@ -57,14 +58,18 @@ numExams=int(input("Por favor digite aqui o número de tipos de prova diferentes
 print(" --------------------------------------------------------------")
 print(" ")
 answers={}
+#separa o gabarito num array, uma posição para cada questão
 feedback=feedback.split('-')
 treatFeedback=[]
 for i in feedback:
+    #aqui deixa só a alternativa, sem o número da questão
     treatFeedback.append(i[len(i)-1]) 
 for para in paras:
+    #checa se tem uma imagem no parágrafo e a adiciona no enunciado da questão atuaç
     if 'graphicData' in para._p.xml:
         currDesc.append((1,countImg))
         countImg= countImg + 1
+    
     elif re.match(r'^[A-za-z][).-]', para.text):
         currAlts.append((countPara,countAlt))
         countAlt= countAlt+1
