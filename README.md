@@ -1,8 +1,17 @@
 # Liquidificador
-Misturador de questões em provas
+
 
 Basicamente, a aplicação serve para gerar várias versões da mesma prova para dificultar que os alunos colem.
 E obviamente, enquanto estudante, isso é falta de consciência de classe :(
+
+## Configurando
+Para executar essa aplicação, é necessário ter python instalado, isso pode ser feito com o seguinte comando:
+
+    sudo apt-get install python3
+
+Depois de fazer o download da aplicação, digite o seguinte comando na pasta que a contém:
+  
+    python3 app.py
 
 ## Observações: 
 A aplicação foi toda baseada em python-docx, que é um módulo um tanto quanto rudimentar e carente de muitas funcionalidades.
