@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <!-- The CSS package above applies Google styling to buttons and other elements. -->
+
+    <style>
+    
+    .branding-below {
+      bottom: 56px;
+      top: 0;
+    }
+    .branding-text {
+      left: 7px;
+      position: relative;
+      top: 3px;
+    }
+    .col-contain {
+      overflow: hidden;
+    }
+    .col-one {
+      float: left;
+      width: 50%;
+    }
+    .col-two {
+      float: right;
+      width: 50%;
+    }
+    .logo {
+      vertical-align: middle;
+    }
+    .radio-spacer {
+      height: 20px;
+    }
+    .width-100 {
+      width: 100%;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar branding-below">
+      <form>
+        <div class="block col-contain">
+          <div class="col-one">
+            <b>Tipo de Questão</b>
+            <div>
+              <input type="radio" name="questFormat" id="radio-quest-qx" value="^QUESTÃO[ ][0-9][0-9][ ]" checked="checked">
+              <label for="radio-quest-qx">QUESTÃO XX </label>
+            </div>
+            <div>
+              <input type="radio" name="questFormat" id="radio-quest-qx)" value="^QUESTÃO[ ][0-9][0-9][)]">
+              <label for="radio-quest-qx)">QUESTÃO XX)</label>
+            </div>
+            <div>
+              <input type="radio" name="questFormat" id="radio-quest-qx." value="^QUESTÃO[ ][0-9][0-9][.]">
+              <label for="radio-quest-qx.">QUESTÃO XX.</label>
+            </div>
+            <div>
+              <input type="radio" name="questFormat" id="radio-quest-qx-" value="^QUESTÃO[ ][0-9][0-9][-]">
+              <label for="radio-quest-qx-">QUESTÃO XX-</label>
+            </div>
+            <div>
+              <input type="radio" name="questFormat" id="radio-x" value="NUMBER">
+              <label for="radio-x">X</label>
+            </div>
+          </div>
+          <div class="col-two">
+            <b>Tipo de Alternativa</b>
+            <div>
+              <input type="radio" name="altFormat" id="radio-alt-A" value="LATIN_UPPER">
+              <label for="radio-alt-A">A</label>
+            </div>
+            <div>
+              <input type="radio" name="altFormat" id="radio-alt-a" value="LATIN_LOWER" checked="checked">
+              <label for="radio-alt-a">a</label>
+            </div>
+            <div>
+              <input type="radio" name="altFormat" id="radio-alt-I" value="ROMAN_UPPER">
+              <label for="radio-alt-I">I</label>
+            </div>
+            <div>
+              <input type="radio" name="altFormat" id="radio-alt-i" value="ROMAN_LOWER">
+              <label for="radio-alt-i">i</label>
+            </div>
+          </div>
+        </div>
+        <p>Selecione uma questão e clique em Adicionar questão</p>
+        <div class="block" id="button-bar">
+          <button id="add-quest">Adicionar questão</button>
+          <button id="rem-quest" disabled="true">Remover questões</button>
+        </div>
+        <div class="block">
+          <button class="blue" id="save-doc">Gerar cópias</button>
+        </div>
+        <div id="quests"></div>
+      </form>
+    </div>
+
+    <div class="sidebar bottom">
+      <img alt="Add-on logo" class="logo" src="https://www.gstatic.com/images/branding/product/1x/translate_48dp.png" width="27" height="27">
+      <span class="gray branding-text">Liquidificador por Heitor e Antônio</span>
+    </div>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>
+       $(function() {
+        $('#save-doc').click(runTranslation);
+        $('#add-quest').click(addQuestion);
+        $('#rem-quest').click(deleteQuestion);
+        });
+        let posToAppend=["#button-bar"]
+      /**
+       * Runs a server-side function to translate the user-selected text and update
+       * the sidebar UI with the resulting translation.
+       */
+      function runTranslation() {
+         console.log("aqui entrou")
+         var resp = google.script.run.helpPlease();
+      }
+      function addQuestion(){
+         this.disabled = true;
+         let questRe = $('input[name=questFormat]:checked').val();
+         let altRe = $('input[name=altFormat]:checked').val();
+         $('#addQuestError').remove();
+         google.script.run
+            .withSuccessHandler(
+              function(questionBeginning, element) {
+                element.disabled = false;
+                showQuestion(questionBeginning["value"],questionBeginning["id"])
+                $("#rem-quest").prop('disabled',false)
+              })
+            .withFailureHandler(
+              function(msg, element) {
+                showError(msg, $('#button-bar'), 'addQuestError');
+                element.disabled = false;
+              })
+             .withUserObject(this)
+            .addQuest(questRe, altRe);
+      }
+      function showQuestion(questValue, questId){
+        var div = $('<div id='+questId+'> <input type="checkbox" name="quest" value='+questId+'>' + questValue + '</div>')
+        $(posToAppend[posToAppend.length-1]).after(div)
+        posToAppend.push('#'+questId)
+        console.log(questId)
+      }
+      function deleteQuestion(){
+        this.disabled=true
+        var checkedQuestions = [...document.querySelectorAll('input[name=quest]:checked')]
+        var questsToDelete = checkedQuestions.map((quest)=>{return quest.value})
+        google.script.run
+           .withSuccessHandler(
+              function(resp, element) {
+                questsToDelete.map((id)=>{$("#"+id).remove()})
+                console.log(questsToDelete)
+                console.log(questsToDelete.includes(questsToDelete[questsToDelete.length-1]))
+                console.log(questsToDelete[questsToDelete.length-1])
+                console.log(posToAppend[posToAppend.length-1])
+                console.log(posToAppend[posToAppend.length-1]===questsToDelete[questsToDelete.length-1].substr(1,undefined))
+                console.log(posToAppend[posToAppend.length-1]==questsToDelete[questsToDelete.length-1].substr(1,undefined))
+                console.log(posToAppend)
+                posToAppend = posToAppend.filter((id)=>!questsToDelete.includes(id.substr(1)))
+                element.disabled = false;
+                console.log(posToAppend)
+              })
+            .withFailureHandler(
+              function(msg, element) {
+                showError(msg, element, 'remQuestError');
+                element.disabled = false;
+              })
+             .withUserObject(this)
+             .delQuest();
+      }
+      /**
+       * Inserts a div that contains an error message after a given element.
+       *
+       * @param {string} msg The error message to display.
+       * @param {DOMElement} element The element after which to display the error.
+       */
+      function showError(msg, element, id) {
+        var div = $('<div id='+id+' class="error">' + msg + '</div>');
+        $(element).after(div);
+      }
+    </script>
+  </body>
+</html>
+
+
