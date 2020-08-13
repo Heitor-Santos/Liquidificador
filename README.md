@@ -1,7 +1,7 @@
 # Liquidificador
 
 
-Basicamente, a aplicação serve para gerar várias versões da mesma prova para dificultar que os alunos colem.
+Basicamente, esta aplicação serve para gerar várias versões da mesma prova para dificultar que os alunos colem.
 E obviamente, enquanto estudante, isso é falta de consciência de classe :(
 
 ## Configurando
